@@ -1,0 +1,4 @@
+{
+  "net/minecraft/client/KeyMapping": "com/matyrobbrt/keybindbundles/ii/KeyMappingExtension",
+  "net/minecraft/client/MouseHandler": "com/matyrobbrt/keybindbundles/ii/MouseHandlerExtension"
+}
