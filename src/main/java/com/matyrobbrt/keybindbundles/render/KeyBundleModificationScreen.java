@@ -3,6 +3,7 @@ package com.matyrobbrt.keybindbundles.render;
 import com.matyrobbrt.keybindbundles.KeyBindBundle;
 import com.matyrobbrt.keybindbundles.KeyBindBundleManager;
 import com.matyrobbrt.keybindbundles.KeyMappingUtil;
+import com.matyrobbrt.keybindbundles.util.SearchTreeManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -15,6 +16,7 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
+import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -25,7 +27,6 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -170,17 +171,20 @@ public class KeyBundleModificationScreen extends Screen {
 
     public class EditKeyScreen extends Screen {
         private final int key;
+        private int middlePos;
         protected EditKeyScreen(int key, Component title) {
             super(title);
             this.key = key;
         }
 
-        private EditBox title, icon;
+        private EditBox title;
+        private AutoCompleteEditBox<ItemStack> icon;
 
         @Override
         protected void init() {
             var font = Minecraft.getInstance().font;
-            title = new EnterEditBox(font, width / 2 - 80, height / 2 - 2 - 20, 160, 20, Component.translatable("box.keybindbundles.key_title")) {
+            middlePos = height / 2 - 20;
+            title = new EnterEditBox(font, width / 2 - 120, middlePos - 2 - 20, 240, 20, Component.translatable("box.keybindbundles.key_title")) {
                 @Override
                 protected void onEnter() {
                     EditKeyScreen.this.setFocused(icon);
@@ -188,24 +192,27 @@ public class KeyBundleModificationScreen extends Screen {
             };
             title.setValue(getEntry().title());
 
-            icon = new EnterEditBox(font, width / 2 - 80, height / 2 + 2 + 9 + 2, 160, 20, Component.translatable("box.keybindbundles.key_icon_id"));
-            icon.setFilter(v -> ResourceLocation.tryParse(v) != null);
+            SearchTree<ItemStack> tree = SearchTreeManager.getSearchTree();
+            icon = new AutoCompleteEditBox<>(font, width / 2 - 120, middlePos + 2 + 9 + 2, 240, 20, 16, 18, 5, Component.translatable("box.keybindbundles.key_icon_id"), tree, i -> i.getItemHolder().getKey().location()) {
+                @Override
+                public void renderItem(GuiGraphics graphics, int x, int y, ItemStack item) {
+                    graphics.renderItem(item, x, y);
+                }
+            };
+            icon.setMaxLength(512);
             if (!getEntry().icon().isEmpty()) {
                 icon.setValue(getEntry().icon().getItemHolder().getRegisteredName());
             }
-            icon.setResponder(s -> BuiltInRegistries.ITEM
-                    .stream().filter(i -> i.builtInRegistryHolder().getRegisteredName().startsWith(s))
-                    .sorted(Comparator.comparing(i -> i.builtInRegistryHolder().getRegisteredName()))
-                    .findFirst()
-                    .ifPresentOrElse(i -> icon.setSuggestion(i.builtInRegistryHolder().getRegisteredName().substring(s.length())), () -> icon.setSuggestion(null)));
 
-            addRenderableWidget(icon);
             addRenderableWidget(title);
+            addRenderableWidget(icon);
 
             addRenderableWidget(new Button.Builder(CommonComponents.GUI_DONE, p -> onClose())
-                    .pos(width / 2 - 160 / 2, icon.getY() + icon.getHeight() + 10)
-                    .size(160, 20)
+                    .pos(width / 2 - 240 / 2, icon.autoComplete().getY() + icon.autoComplete().getHeight() + 10)
+                    .size(240, 20)
                     .build());
+
+            addRenderableWidget(icon.autoComplete());
         }
 
         @Override
@@ -216,15 +223,17 @@ public class KeyBundleModificationScreen extends Screen {
             guiGraphics.drawString(font, getTitle(), width / 2 - font.width(getTitle()) / 2, 30, 0xffffffff);
 
             var title = Component.translatable("box.keybindbundles.key_title");
-            guiGraphics.drawString(Minecraft.getInstance().font, title, width / 2 - font.width(title) / 2, height / 2 - 2 - 20 - 2 - 9, 0xffffffff);
+            guiGraphics.drawString(Minecraft.getInstance().font, title, width / 2 - font.width(title) / 2, middlePos - 2 - 20 - 2 - 9, 0xffffffff);
 
             var icon = Component.translatable("box.keybindbundles.key_icon");
-            guiGraphics.drawString(Minecraft.getInstance().font, icon, width / 2 - font.width(icon) / 2, height / 2 + 2, 0xffffffff);
+            guiGraphics.drawString(Minecraft.getInstance().font, icon, width / 2 - font.width(icon) / 2, middlePos + 2, 0xffffffff);
 
             if (!this.icon.getValue().isEmpty()) {
-                var item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(this.icon.getValue()));
+                var parsed = ResourceLocation.tryParse(this.icon.getValue());
+                if (parsed == null) return;
+                var item = BuiltInRegistries.ITEM.get(parsed);
                 if (item != Items.AIR) {
-                    guiGraphics.renderItem(item.getDefaultInstance(), width / 2 + 80 + 2, height / 2 + 1 + 9 + 2 + (20 - 16) / 2);
+                    guiGraphics.renderItem(item.getDefaultInstance(), this.icon.getX() + this.icon.getWidth() + 2, middlePos + 1 + 9 + 2 + (20 - 16) / 2);
                 }
             }
         }
@@ -232,8 +241,9 @@ public class KeyBundleModificationScreen extends Screen {
         @Override
         public void onClose() {
             var old = getEntry();
+            var parsed = ResourceLocation.tryParse(this.icon.getValue());
             var newEntry = new KeyBindBundle.KeyEntry(old.key(), title.getValue(),
-                    icon.getValue().isEmpty() ? ItemStack.EMPTY : BuiltInRegistries.ITEM.get(ResourceLocation.parse(this.icon.getValue())).getDefaultInstance());
+                    parsed == null ? ItemStack.EMPTY : BuiltInRegistries.ITEM.get(parsed).getDefaultInstance());
             entries.set(key, newEntry);
             bundle.getEntries().set(key, newEntry);
 

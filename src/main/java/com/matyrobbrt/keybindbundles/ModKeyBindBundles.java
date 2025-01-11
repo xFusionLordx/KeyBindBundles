@@ -1,6 +1,7 @@
 package com.matyrobbrt.keybindbundles;
 
 import com.matyrobbrt.keybindbundles.render.KeybindSelectionOverlay;
+import com.matyrobbrt.keybindbundles.util.SearchTreeManager;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -92,5 +93,7 @@ public class ModKeyBindBundles {
         });
 
         NeoForge.EVENT_BUS.addListener((final ScreenEvent.Opening event) -> KeyMappingUtil.restoreAll());
+
+        NeoForge.EVENT_BUS.addListener(SearchTreeManager::onPlayerJoin);
     }
 }
