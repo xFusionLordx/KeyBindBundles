@@ -135,6 +135,20 @@ public class KeybindSelectionOverlay extends RadialMenuRenderer<KeyBindBundle.Ke
     }
 
     public void close() {
+        var kb = this.displayedKeybind;
+        if (kb != null && KBClientConfig.TRIGGER_KEYMAPPING_ON_RELEASE.getAsBoolean()) {
+            var idx = getElementUnderMouse(false);
+            if (idx >= 0) {
+                var key = KeyMappingUtil.getByName(displayedKeybind.getEntries().get(idx).key());
+                if (key != null) {
+                    KeyMappingUtil.press(key);
+                    KeyMappingUtil.click(key);
+                    // Delay release until next tick
+                    Minecraft.getInstance().execute(() -> KeyMappingUtil.release(key));
+                }
+            }
+        }
+
         this.displayedKeybind = null;
         this.displayedMapping = null;
 
