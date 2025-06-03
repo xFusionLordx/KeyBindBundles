@@ -33,7 +33,7 @@ import java.util.Optional;
 public class KeyBundleModificationScreen extends Screen {
     public static KeyBindBundle currentlySelecting;
 
-    private static final KeyBindBundle.KeyEntry ADD_ENTRY = new KeyBindBundle.KeyEntry("add", "Add Entry", ItemStack.EMPTY);
+    private static final KeyBindBundle.KeyEntry ADD_ENTRY = new KeyBindBundle.KeyEntry("add", "§6Add Entry§r", ItemStack.EMPTY);
     private static final List<Component> TOOLTIPS = List.of(
             Component.translatable("tooltip.keybindbundles.bundle.edit_entry"),
             Component.translatable("tooltip.keybindbundles.bundle.delete_entry"),
