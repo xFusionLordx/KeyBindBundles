@@ -54,6 +54,9 @@ public class KeybindSelectionOverlay extends RadialMenuRenderer<KeyBindBundle.Ke
     }
 
     public void mouseClick(double mouseX, double mouseY, int button, int action) {
+        var displayedKeybind = this.displayedKeybind;
+        if (displayedKeybind == null) return;
+
         if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && currentlyPressing != null && action == GLFW.GLFW_RELEASE) {
             KeyMappingUtil.release(currentlyPressing);
             currentlyPressing = null;

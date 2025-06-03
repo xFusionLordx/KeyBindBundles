@@ -8,7 +8,6 @@
     "KeyMappingMixin",
     "BaseKeyEntryMixin",
     "InputConstantsMixin",
-    "MouseHandlerMixin",
 
     "compat.NewKeyEntryMixin",
 
