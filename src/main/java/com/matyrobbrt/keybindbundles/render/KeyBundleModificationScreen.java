@@ -145,7 +145,7 @@ public class KeyBundleModificationScreen extends Screen {
                     bundle.getEntries().remove(element);
                 } else {
                     var key = KeyMappingUtil.getByName(bundle.getEntries().get(element).key());
-                    Minecraft.getInstance().pushGuiLayer(new EditKeyScreen(element, key == null ? Component.empty() : Component.translatable("title.keybindbundles.editing_key", key.kbb$getDisplayName().copy().withStyle(ChatFormatting.GOLD))));
+                    Minecraft.getInstance().pushGuiLayer(new EditKeyScreen(element, key == null ? Component.empty() : Component.translatable("title.keybindbundles.editing_key", key.getDisplayName().copy().withStyle(ChatFormatting.GOLD))));
                 }
             } else {
                 int newPos;

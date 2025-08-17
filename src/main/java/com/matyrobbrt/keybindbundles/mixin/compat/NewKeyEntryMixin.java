@@ -38,8 +38,8 @@ public class NewKeyEntryMixin extends BaseKeyEntryMixin implements OverrideListe
 
     @Inject(at = @At("TAIL"), method = "<init>")
     private void handleCustom(NewKeyBindsList owner, KeyMapping key, Component name, CallbackInfo ci) {
-        var customName = key.kbb$getNameOverride();
-        if (customName != null) {
+        var customName = key.getDisplayName();
+        if (customName != null && customName != this.keyDesc) {
             name = customName;
             this.keyDesc = name;
         }

@@ -10,7 +10,6 @@ import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,18 +29,9 @@ public class KeyEntryMixin extends BaseKeyEntryMixin {
     @Final
     private KeyBindsList this$0;
 
-    @Shadow
-    @Mutable
-    private Component name;
 
     @Inject(at = @At("TAIL"), method = "<init>")
     private void handleCustom(KeyBindsList owner, KeyMapping key, Component name, CallbackInfo ci) {
-        var customName = key.kbb$getNameOverride();
-        if (customName != null) {
-            name = customName;
-            this.name = name;
-        }
-
         kbb$handleCustom(key, name);
     }
 

@@ -120,7 +120,7 @@ public class KeyBindBundleManager {
         }
 
         @Override
-        public Component kbb$getNameOverride() {
+        public Component getDisplayName() {
             return name;
         }
 

@@ -5,7 +5,6 @@ import com.matyrobbrt.keybindbundles.PriorityKeyMapping;
 import com.matyrobbrt.keybindbundles.ii.KeyMappingExtension;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.settings.KeyMappingLookup;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -70,12 +69,6 @@ public class KeyMappingMixin implements KeyMappingExtension {
     @Override
     public void incrementClickCount() {
         clickCount++;
-    }
-
-    @Override
-    public Component kbb$getDisplayName() {
-        var ov = kbb$getNameOverride();
-        return ov == null ? Component.translatable(name) : ov;
     }
 
     @Override
